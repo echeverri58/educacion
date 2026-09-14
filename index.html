@@ -207,9 +207,8 @@
         <div class="field">
           <label>Semestre</label>
           <select id="f-semestre">
-            <option value="ambos">Ambos (1 + 2)</option>
-            <option value="2">Semestre 2</option>
             <option value="1">Semestre 1</option>
+            <option value="2">Semestre 2</option>
           </select>
         </div>
         <div class="field">
@@ -433,7 +432,7 @@ const EST_DIMS = {
 };
 
 const state = {
-  semestre:"ambos", sector:"Todos", caracter:"Todos", departamento:"Todos",
+  semestre:"1", sector:"Todos", caracter:"Todos", departamento:"Todos",
   municipio:"Todos", acreditada:"Todos", seccionales:"Todos", buscar:"",
   group:"institucion", metric:"estudiantes", tableMetric:"estudiantes",
   docDim:"sexo", estDim:"nivelAcademico", gradDim:"nivelAcademico",
@@ -445,18 +444,8 @@ const fmt = n => (Number(n)||0).toLocaleString("es-CO");
 
 /* ---------- agregación por semestre ---------- */
 function sumMap(m1,m2){const o={...m1};for(const k in m2)o[k]=(o[k]||0)+m2[k];return o;}
-function sumPop(p1,p2){
-  const o={total:(p1.total||0)+(p2.total||0)};
-  for(const k in p1){ if(k!=="total") o[k]=sumMap(p1[k]||{},p2[k]||{}); }
-  return o;
-}
 function semBlock(inst){
-  if(state.semestre==="1") return inst.sem1;
-  if(state.semestre==="2") return inst.sem2;
-  return {docentes:sumPop(inst.sem1.docentes,inst.sem2.docentes),
-          admin:sumPop(inst.sem1.admin,inst.sem2.admin),
-          estudiantes:sumPop(inst.sem1.estudiantes,inst.sem2.estudiantes),
-          graduados:sumPop(inst.sem1.graduados,inst.sem2.graduados)};
+  return state.semestre==="2" ? inst.sem2 : inst.sem1;
 }
 
 /* ---------- filtrado ---------- */
@@ -723,7 +712,7 @@ function renderMainChart(){
   }
   const metricLabel = METRICS[state.metric].label.toLowerCase();
   $("main-lead").textContent = metricLabel[0].toUpperCase()+metricLabel.slice(1)+" por "+
-    (state.group==="institucion"?"institución":state.group)+" · "+(state.semestre==="ambos"?"ambos semestres (1+2)":"semestre "+state.semestre)+".";
+    (state.group==="institucion"?"institución":state.group)+" · semestre "+state.semestre+".";
 
   hBarChart($("main-chart"), items, {
     color, tooltip,
@@ -988,9 +977,9 @@ function bindEvents(){
   $("f-buscar").oninput = e=>{ state.buscar=e.target.value; renderAll(); };
   $("btn-reset").onclick = ()=>{
     state.sector=state.caracter=state.departamento=state.municipio=state.acreditada=state.seccionales="Todos";
-    state.buscar=""; state.semestre="ambos";
+    state.buscar=""; state.semestre="1";
     ["f-sector","f-caracter","f-departamento","f-municipio","f-acreditada","f-seccionales"].forEach(id=>$(id).value="Todos");
-    $("f-semestre").value="ambos"; $("f-buscar").value="";
+    $("f-semestre").value="1"; $("f-buscar").value="";
     renderAll();
   };
 
