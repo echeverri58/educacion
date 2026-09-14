@@ -52,11 +52,15 @@ insts = defaultdict(lambda: {
     "sem1": {"docentes": {"total": 0, "sexo": {}, "formacion": {}, "dedicacion": {}, "contrato": {}},
              "admin": {"total": 0, "categoria": {}},
              "estudiantes": {"total": 0, "nivelAcademico": {}, "formacion": {}, "modalidad": {},
-                             "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}}},
+                             "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}},
+             "graduados": {"total": 0, "nivelAcademico": {}, "formacion": {}, "modalidad": {},
+                           "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}}},
     "sem2": {"docentes": {"total": 0, "sexo": {}, "formacion": {}, "dedicacion": {}, "contrato": {}},
              "admin": {"total": 0, "categoria": {}},
              "estudiantes": {"total": 0, "nivelAcademico": {}, "formacion": {}, "modalidad": {},
-                             "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}}},
+                             "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}},
+             "graduados": {"total": 0, "nivelAcademico": {}, "formacion": {}, "modalidad": {},
+                           "area": {}, "sexo": {}, "programaAcreditado": {}, "deptoOferta": {}}},
 })
 
 def ensure_meta(inst, codigo_sede, codigo_padre, nombre, tipo, sector, caracter, depto, muni, acred):
@@ -148,6 +152,32 @@ for r in load("Estudiantes 2025.xlsx"):
     if prog_acred: bump(e["programaAcreditado"], str(prog_acred).strip(), cnt)
     if depto_oferta: bump(e["deptoOferta"], str(depto_oferta).strip(), cnt)
 
+# ---------------- GRADUADOS ----------------
+print("Leyendo Graduados...")
+for r in load("estudianrtes graduados.xlsx"):
+    padre, nombre, tipo = r[1], r[2], r[3]
+    sector, caracter = r[5], r[7]
+    depto, muni, acred = r[9], r[11], r[12]
+    nivel_acad, formacion = r[17], r[19]
+    modalidad, area = norm_modalidad(r[21]), r[23]
+    sexo, prog_acred = r[37], r[15]
+    depto_oferta = r[33]
+    sem, cnt = r[39], num(r[40])
+    sem = int(sem) if sem is not None else 1
+    key = str(padre)
+    inst = insts[key]
+    ensure_meta(inst, r[0], padre, nombre, tipo, sector, caracter, depto, muni, acred)
+    blk = inst["sem1"] if sem == 1 else inst["sem2"]
+    g = blk["graduados"]
+    g["total"] += cnt
+    if nivel_acad: bump(g["nivelAcademico"], str(nivel_acad).strip(), cnt)
+    if formacion: bump(g["formacion"], str(formacion).strip(), cnt)
+    bump(g["modalidad"], modalidad, cnt)
+    if area: bump(g["area"], str(area).strip(), cnt)
+    if sexo: bump(g["sexo"], str(sexo).strip(), cnt)
+    if prog_acred: bump(g["programaAcreditado"], str(prog_acred).strip(), cnt)
+    if depto_oferta: bump(g["deptoOferta"], str(depto_oferta).strip(), cnt)
+
 print("Total instituciones:", len(insts))
 
 # convertir set de sedes a conteo
@@ -192,4 +222,5 @@ print("data.json escrito OK")
 d_total = sum(i["sem1"]["docentes"]["total"] + i["sem2"]["docentes"]["total"] for i in lista)
 a_total = sum(i["sem1"]["admin"]["total"] + i["sem2"]["admin"]["total"] for i in lista)
 e_total = sum(i["sem1"]["estudiantes"]["total"] + i["sem2"]["estudiantes"]["total"] for i in lista)
-print("Docentes:", d_total, "| Admin:", a_total, "| Estudiantes:", e_total)
+g_total = sum(i["sem1"]["graduados"]["total"] + i["sem2"]["graduados"]["total"] for i in lista)
+print("Docentes:", d_total, "| Admin:", a_total, "| Estudiantes:", e_total, "| Graduados:", g_total)
