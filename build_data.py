@@ -201,7 +201,7 @@ out = {
         "fuente": "SNIES - Ministerio de Educación Nacional",
         "corte": "Mayo 31 de 2026",
         "anio": 2025,
-        "desarrolladoPor": "John Alexander Echeverry",
+        "desarrolladoPor": "John A. Echeverry",
         "para": "Mauricio",
     },
     "dimensiones": {
